@@ -26,14 +26,15 @@ public record StreamShipReader(InputStream input ) implements ShipReader {
 private List<Ship> loadFrom(InputStream in) throws IOException{
         return loadFrom(new InputStreamReader(in));
 }
+
 private List<Ship> loadFrom(Reader reader)  throws IOException{
     return loadFrom(reader.readAllLines());
 }
 
 private List<Ship> loadFrom(List<String> lines) {
         List<Ship> ships = new ArrayList<>();
-        for(int lineIndex = 0; lineIndex < lines.size(); lineIndex++){
-            ships.add(shipOf(lines.get(lineIndex), lineIndex++));
+        for(int lineIndex = 1; lineIndex < lines.size(); lineIndex++){
+            ships.add(shipOf(lines.get(lineIndex), lineIndex + 1));
         }
         return List.copyOf(ships);
 }
@@ -44,7 +45,7 @@ private Ship shipOf(String lines, int lineIndex){
 
 private Ship shipOf(String[] lines, int lineIndex){
         if(lines.length != 3){
-            throw new ShipLoadException("Line " + lineIndex + ": expected 3  columns but found: " + lines.length);
+            throw new ShipLoadException("Line " + lineIndex + ": expected 3 columns but found: " + lines.length);
         }
         return  new Ship(lines[0], lines[1], cannonsOf(lines[2], lineIndex));
 }
