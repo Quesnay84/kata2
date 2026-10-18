@@ -1,26 +1,27 @@
 package software.ulpgc.katas;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.List;
-
 import software.ulpgc.katas.io.*;
-import software.ulpgc.katas.model.*;
+import software.ulpgc.katas.model.ShipSummary;
+import java.io.*;
+import java.net.URI;
 
 
 public class Main {
-    private static final String DATA_FILE = "data/malformed.tsv";
-    public static void main(String[] arg) {
-        try {
-            ShipReader reader = new StreamShipReader(new FileInputStream(DATA_FILE));
-            SummaryWriter writer = new OutputStreamSummary(System.out);
+    public static void main(String[] args) {
+        try (OutputStream output = new FileOutputStream("summary.txt")) {
+            ShipReader reader = new StreamShipReader(open("https://raw.githubusercontent.com/Quesnay84/kata2/master/data/ships.tsv"));
+            SummaryWriter writer = new OutputStreamSummaryWriter(output);
             writer.write(ShipSummary.of(reader.load()));
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found: " + DATA_FILE);
-        } catch (ShipLoadException e) {
+        } catch (ShipLoadException | UncheckedIOException | IOException e) {
             System.err.println(e.getMessage());
         }
+    }
 
-
+    private static InputStream open(String url) {
+        try {
+            return URI.create(url).toURL().openStream();
+        } catch (IOException | IllegalArgumentException e) {
+            throw new ShipLoadException("The URL could not be opened: " + url, e);
+        }
     }
 }
+

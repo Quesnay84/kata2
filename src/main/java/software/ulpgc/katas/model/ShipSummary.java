@@ -1,18 +1,14 @@
 package software.ulpgc.katas.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public record ShipSummary(Map<String, Integer> shipsPerPort) {
 
     public ShipSummary{
-        shipsPerPort = Collections.unmodifiableMap(new HashMap<>(shipsPerPort));
+        shipsPerPort = Collections.unmodifiableMap(new TreeMap<>(shipsPerPort));
     }
     public static ShipSummary of(List<Ship> ships){
-        Map<String, Integer> counts = new HashMap<>();
-        ships.forEach(ship -> counts.put(ship.port(), counts.getOrDefault(ship.port(), 0) + 1));
-        return new ShipSummary(counts);
+        return new ShipSummary(ships.stream().collect(Collectors.toMap(Ship::port, ship -> 1, Integer::sum)));
     }
 }

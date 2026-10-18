@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public record StreamShipReader(InputStream stream) implements ShipReader {
 
@@ -29,11 +29,9 @@ public record StreamShipReader(InputStream stream) implements ShipReader {
         return loadFrom(reader.readAllLines());
     }
     private List<Ship> loadFrom(List<String> lines) {
-        List<Ship> ships = new ArrayList<>();
-        for(int i = 0; i < lines.size(); i++){
-            ships.add(shipOf(lines.get(i), ++i));
-
-        }
+        return IntStream.range(1, lines.size())
+                .mapToObj(i -> shipOf(lines.get(i), i + 1))
+                .toList();
     }
 
     private Ship shipOf(String shipLine, int line) {
@@ -46,7 +44,7 @@ public record StreamShipReader(InputStream stream) implements ShipReader {
 
     private Ship shipOf(String[] shipLine,  int line) {
         if(!(shipLine.length == 3)){
-            throw new ShipLoadException("Line" + line + "expected 3 columns but found: " + shipLine.length);
+            throw new ShipLoadException("Line " + line + " expected 3 columns but found: " + shipLine.length);
         }
         return new Ship(shipLine[0], shipLine[1], cannonsOf(shipLine[2], line));
     }

@@ -2,7 +2,7 @@ package software.ulpgc.katas.io;
 
 import java.io.IOException;
 
-public class ShipLoadException extends Exception {
+public class ShipLoadException extends RuntimeException {
     public ShipLoadException(String s) {
         super(s);
     }
