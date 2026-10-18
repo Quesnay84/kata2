@@ -1,63 +1,62 @@
 package software.ulpgc.katas.io;
+
 import software.ulpgc.katas.model.Ship;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+public record StreamShipReader(InputStream stream) implements ShipReader {
 
-public record StreamShipReader(InputStream input ) implements ShipReader {
 
     @Override
     public List<Ship> load() {
-        try{
-            try(input){
-                return loadFrom(input);
-            }
-        }
-        catch (IOException e){
-            throw new RuntimeException(e);
+        try(stream){
+            return loadFrom(stream);
+        } catch (IOException e){
+            throw new  RuntimeException(e);
         }
     }
 
-private List<Ship> loadFrom(InputStream in) throws IOException{
-        return loadFrom(new InputStreamReader(in));
-}
-
-private List<Ship> loadFrom(Reader reader)  throws IOException{
-    return loadFrom(reader.readAllLines());
-}
-
-private List<Ship> loadFrom(List<String> lines) {
+    private List<Ship> loadFrom(InputStream stream) throws IOException {
+        return loadFrom(new InputStreamReader(stream, StandardCharsets.UTF_8));
+    }
+    private List<Ship> loadFrom(Reader reader) throws IOException {
+        return loadFrom(reader.readAllLines());
+    }
+    private List<Ship> loadFrom(List<String> lines) {
         List<Ship> ships = new ArrayList<>();
-        for(int lineIndex = 1; lineIndex < lines.size(); lineIndex++){
-            ships.add(shipOf(lines.get(lineIndex), lineIndex + 1));
+        for(int i = 0; i < lines.size(); i++){
+            ships.add(shipOf(lines.get(i), ++i));
+
         }
-        return List.copyOf(ships);
-}
+    }
 
-private Ship shipOf(String lines, int lineIndex){
-        return shipOf(lines.split("\t", -1), lineIndex);
-}
+    private Ship shipOf(String shipLine, int line) {
+        return shipOf(fieldsOf(shipLine), line);
+    }
 
-private Ship shipOf(String[] lines, int lineIndex){
-        if(lines.length != 3){
-            throw new ShipLoadException("Line " + lineIndex + ": expected 3 columns but found: " + lines.length);
+    private String[] fieldsOf(String shipLine) {
+        return shipLine.split("\t", -1);
+    }
+
+    private Ship shipOf(String[] shipLine,  int line) {
+        if(!(shipLine.length == 3)){
+            throw new ShipLoadException("Line" + line + "expected 3 columns but found: " + shipLine.length);
         }
-        return  new Ship(lines[0], lines[1], cannonsOf(lines[2], lineIndex));
-}
+        return new Ship(shipLine[0], shipLine[1], cannonsOf(shipLine[2], line));
+    }
 
-private int cannonsOf(String number, int lineIndex) {
+    private int cannonsOf(String shipLine, int line) {
         try{
-            return Integer.parseInt(number);
+           return Integer.parseInt(shipLine);
+        } catch(NumberFormatException e){
+            throw new ShipLoadException("Cannon field not correct in line: " + line, e);
         }
-        catch (NumberFormatException e){
-            throw new ShipLoadException("Line " + lineIndex + ": expected a number but it was " + e);
-        }
-}
-
+    }
 
 }
