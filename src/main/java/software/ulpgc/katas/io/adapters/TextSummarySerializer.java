@@ -5,7 +5,7 @@ import software.ulpgc.katas.model.ShipSummary;
 
 import java.util.stream.Collectors;
 
-public record TextSummarySerializer(ShipSummary summary) implements SummarySerializer {
+public record TextSummarySerializer() implements SummarySerializer {
     @Override
     public String serialize(ShipSummary shipSummary) {
         return shipSummary.shipsPerPort().entrySet().stream()
